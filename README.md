@@ -13,3 +13,6 @@ The reasons why this is useful (I think):
 - managing secrets in one place - the Keychain - is easier and better than trying to remember multiple locations
 
 I got this idea from the "osxkeychain" credential.helper that git has on Macs. This extends Keychain-stored secrets to curl as well.
+
+Usage example:
+```curl --netrc-file <( netrc-osxkeychain.sh "Some Keychain Item" ) https://some-server.domain.tld/blah/```
