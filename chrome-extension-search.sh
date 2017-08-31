@@ -7,6 +7,14 @@
 # this generates a Google search URL from each Extension ID
 # found in your Chrome Extensions folder.
 #
+# Why is this useful? One day all my Chrome Extensions disappeared.
+# Poof! Gone.
+# The only thing I had was a backup which showed the IDs such as
+# "edacconmaakjimmfgnblocblbcdcpbko". Not useful if you want to
+# figure out what it is to re-install it! This script at least
+# makes it quick to search Google for that ID, and it very likely
+# will get you a Chrome Store result.
+#
 # Optional: Supply an argument of an alternate directory to search.
 # (This can be very useful if you are trying to look at a Time Machine
 # backup and figure out which extensions you had at a certain date
