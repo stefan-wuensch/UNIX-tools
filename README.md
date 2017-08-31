@@ -11,13 +11,13 @@ Why is this useful? One day all my Chrome Extensions disappeared. _Poof!_ Gone.
 
 The only thing I had was a backup which showed the IDs such as `edacconmaakjimmfgnblocblbcdcpbko`. Not useful if you want to figure out what it is to re-install it! This script at least makes it quick to search Google for that ID, and it very likely will get you a Chrome Store result.
 
-_Optional_: Supply an argument of an alternate directory to search.
+__Optional__: Supply an argument of an alternate directory to search.
 
 (This can be very useful if you are trying to look at a Time Machine backup and figure out which extensions you had at a certain date in the past.)
 
-_Output_: Basic HTML you can use to track down an Extension.
+__Output__: Basic HTML you can use to track down an Extension.
 
-_Example output_:
+__Example output__:
 ```
 <html>
 <a href="https://www.google.com/search?q=fhgenkpocbhhddlgkjnfghpjanffonno">https://www.google.com/search?q=fhgenkpocbhhddlgkjnfghpjanffonno</a> <br>
