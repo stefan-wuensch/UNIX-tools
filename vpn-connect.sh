@@ -30,12 +30,12 @@
 # 	- must be multiple lines, in this order: [ username#realm, password, blank line, "y" ]
 # 
 # Secure Note Example:
-#-------------------------------------
+#-------------------------------------------------------
 # john_harvard@harvard.edu#vpnrealm
 # p4ssw0rd
 # 
 # y
-#-------------------------------------
+#-------------------------------------------------------
 # 
 # 
 # Password Item:
@@ -43,9 +43,9 @@
 # 	- elements are the same as, and in the same order as, the Secure Note format
 # 
 # Password Item Example:
-#-------------------------------------
+#-------------------------------------------------------
 # john_harvard@harvard.edu#vpnrealm\np4ssw0rd\n\ny\n
-#-------------------------------------
+#-------------------------------------------------------
 # 
 # Note that there are two "\n" back-to-back in the Password Item, to represent the
 # end of the password line and the blank line.
