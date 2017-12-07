@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1117
 
 # vpn-connect.sh
 #
@@ -94,6 +95,8 @@
 # Shout-outs:
 # https://superuser.com/questions/1153273/access-key-pairs-in-a-macos-keychain-from-the-commandline
 # https://superuser.com/questions/649614/connect-using-anyconnect-from-command-line
+#
+# Checked with https://www.shellcheck.net/
 
 
 
@@ -128,7 +131,7 @@ usage() {
 start_dots() {
 	while true ; do printf "." ; sleep 1 ; done 1>&2 &
 	childPID=$!
-	echo $childPID
+	echo "${childPID}"
 }
 
 
@@ -136,7 +139,7 @@ start_dots() {
 ### Function: Stop the dots!
 
 stop_dots() {
-	kill $1
+	kill "${1}"
 	trap  0 2 3 15
 	echo " Done."
 }
@@ -149,7 +152,7 @@ stop_dots() {
 # Since this script is all about getting the VPN credentials from Mac OS
 # Keychain, there's no point in proceeding if we're not running on a Mac!!
 for command in security xxd plutil xmllint vpn open ; do
-	if ! which ${command} >/dev/null 2>&1 ; then
+	if ! which "${command}" >/dev/null 2>&1 ; then
 		>&2 echo "Error: Can't find required Mac OS command \"${command}\" in paths \"${PATH}\" - are you running this on a Mac, with Cisco AnyConnect client installed?"
 		exit 1
 	fi
@@ -158,7 +161,7 @@ done
 
 # Test first arg for a leading dash. If ARGV[1] doesn't start with a dash, it's invalid.
 if [[ -n "${1}" ]] ; then	# Only if it's set
-	if ! printf "%s\n" "${1}" | egrep -q -- '^-.' ; then	# use printf for portability since '-n' is a valid arg to 'echo'
+	if ! printf "%s\n" "${1}" | grep -E -q -- '^-.' ; then	# use printf for portability since '-n' is a valid arg to 'echo'
 		>&2 echo -e "\nError: \"${1}\" is not a valid option."
 		>&2 usage
 		exit 1
@@ -209,7 +212,7 @@ if /bin/echo "${raw_keychain}" | grep -q '\\n' ; then
 
 else
 	# Secure Note, so we extract it.
-	login_script=$( echo ${raw_keychain} |
+	login_script=$( echo "${raw_keychain}" |
 		xxd -r -p |				# Decode the hex
 		plutil -extract "NOTE" xml1 -o - - |	# Get the note part of the PLIST
 		xmllint --xpath '//string/text()' -	# Grab only the "string" element of the XML
@@ -223,9 +226,9 @@ fi
 if vpn state | grep -q "state: Connected" ; then
 	echo -e "\n*** VPN connection appears to be already established! ***"
 	echo "\"/opt/cisco/anyconnect/bin/vpn state\" reports \"state: Connected\""
-	vpn stats | egrep 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
+	vpn stats | grep -E 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
 	printf "Do you want to end the current connection and continue? [Y/n] "
-	read answer
+	read -r answer
 	case ${answer} in
 		n*)	echo "OK - exiting this script to preserve your existing connection."
 			exit 0 ;;
@@ -240,7 +243,7 @@ fi
 # If the regular Mac client app is running, it prevents the CLI from connecting.
 # Quit the UI app if it's found. We'll start it again at the end.
 # (It's handy to have the menu-bar-item showing the status.)
-ui_pid=$( pgrep "Cisco AnyConnect Secure Mobility Client" ) && kill $ui_pid
+ui_pid=$( pgrep "Cisco AnyConnect Secure Mobility Client" ) && kill "${ui_pid}"
 
 
 # Making an attempt to limit the run-away looping of a failed "script" connection...
@@ -254,7 +257,7 @@ echo -e "\nIf the connection does not complete after 20 to 30 seconds, hit Contr
 echo "After repeated failures, check your credentials \"script\" in the Keychain, and try"
 echo "running this again with \"-v\" flag."
 echo -e "\nIf your credentials script from the Keychain works, the next thing you should get is the prompt from Duo."
-printf "\nConnecting to ${vpn_host}..."
+printf "\nConnecting to %s..." "${vpn_host}"
 
 
 # Only show output from the connection if '-v' arg was given.
@@ -268,7 +271,7 @@ else
 	exit_state=$?
 fi
 
-[[ -n "${dotsPID}" ]] && stop_dots $dotsPID
+[[ -n "${dotsPID}" ]] && stop_dots "${dotsPID}"
 
 if [[ ${exit_state} -ne 0 ]] ; then
 	echo "Problem making VPN connection. Check your keychain item, and try running this with \"-v\"."
@@ -278,7 +281,7 @@ fi
 # Display the state of the connection - which should be "state: Connected" from the "vpn" command.
 if vpn state | grep -q "state: Connected" ; then
 	echo "Connected!"
-	vpn stats | egrep 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
+	vpn stats | grep -E 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
 else
 	echo "VPN appears not connected when running command \"/opt/cisco/anyconnect/bin/vpn state\". Something may have gone wrong. Try repeating with \"-v\"."
 	exit 1
