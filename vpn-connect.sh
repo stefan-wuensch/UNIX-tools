@@ -197,7 +197,7 @@ ui_pid=$( pgrep "Cisco AnyConnect Secure Mobility Client" ) && kill $ui_pid
 echo -e "\nIf the connection does not complete after 20 to 30 seconds, hit Control-C (^C) to abort."
 echo "After repeated failures, check your credentials \"script\" in the Keychain, and try"
 echo "running this again with \"-v\" flag."
-echo -e "\nIf your credentials script from the Keychain worked, the next thing you should get is the prompt from Duo."
+echo -e "\nIf your credentials script from the Keychain works, the next thing you should get is the prompt from Duo."
 printf "\nConnecting to ${vpn_host}..."
 
 
