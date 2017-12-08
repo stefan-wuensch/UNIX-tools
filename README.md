@@ -41,3 +41,29 @@ I got this idea from the "osxkeychain" credential.helper that git has on Macs. T
 Usage example:
 
 ```$ curl --netrc-file <( netrc-osxkeychain.sh "Some Keychain Item" ) https://some-server.domain.tld/blah/```
+
+
+
+
+## vpn-connect.sh
+
+This allows you to quickly connect the Cisco AnyConnect VPN from the Mac command-line (Terminal app).
+
+This script streamlines the connecting to a Cisco VPN. If you use the Cisco AnyConnect VPN client on a Mac,
+you don't have to suffer with the GUI app any longer. (I say "suffer" because I'm a UNIX geek and the more
+time I can keep my hands on the keyboard and off the mouse the better!) Also I got tired of typing my password
+each time I connect, when I knew there was a secure way to store my password already on my Mac.
+
+This reads your VPN login credentials from the *<a href="https://support.apple.com/kb/PH20093">Mac OS Keychain</a>*,
+where they can be stored securely! Using the Keychain for credentials storage was actually the reason for
+writing this script. If you don't mind typing your username & password etc. each time, you can simply run
+`/opt/cisco/anyconnect/bin/vpn` but that's actually more time-consuming than the Mac UI app!
+
+In this script you can customize the two key variables that set defaults for:
+- the name of the Keychain Item which contains your VPN login credentials
+- the name of the VPN target device
+
+Once you customize those two variables (or simply give those two parameters as command-line arguments) then
+you can connect to the VPN with a single CLI command.
+
+Yay!!! Time saved from doing repetitive tasks is more time to do cool things!!
