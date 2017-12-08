@@ -99,6 +99,10 @@
 #
 # Checked with https://www.shellcheck.net/
 #
+# Note for people outside Harvard using this: If you don't use two-factor auth from Duo for your Cisco VPN,
+# then the blank line in the connection script probably should be removed. I'm not sure about that, since
+# the only environment where I can test this script requires 2FA with Duo. Caveat emptor.
+#
 ########################################################################################################################
 # MIT License
 #
@@ -197,7 +201,7 @@ fi
 # Take the args if they are present
 while getopts ":vhn:d:" theOption ; do
 	case $theOption in
-		v)	echo "Turning on verbose mode. YOUR CREDENTIALS MIGHT BE DISPLAYED."
+		v)	echo -e "\nTurning on verbose mode. YOUR CREDENTIALS MIGHT BE DISPLAYED."
 			echo "Hit ^C in the next 5 seconds if this is not what you want."
 			sleep 5
 			verbose="YES" ;;
@@ -223,7 +227,7 @@ done
 
 # Check for that Keychain item name while assigning. Bail out if it's not there.
 if ! raw_keychain=$( security find-generic-password -s "${keychain_script_name}" -w 2>&1 ) ; then
-	echo "Can't find \"${keychain_script_name}\" in your Mac OS Keychain. Exiting."
+	>&2 echo -e "\nError: Can't find \"${keychain_script_name}\" in your Mac OS Keychain. Exiting."
 	exit 1
 fi
 
@@ -235,14 +239,18 @@ if /bin/echo "${raw_keychain}" | grep -q '\\n' ; then
 
 	# Password item, so we use 'echo -e' to evaluate the '\n' into newlines
 	login_script=$( echo -e "${raw_keychain}" )
+	# Confirm that we're using a Password item, which one, and the VPN target name
+	echo -e "\nUsing login script from Keychain Password Item \"${keychain_script_name}\" to connect to \"${vpn_host}\"..."
 
 else
 	# Secure Note, so we extract it.
 	login_script=$( echo "${raw_keychain}" |
-		xxd -r -p |				# Decode the hex
-		plutil -extract "NOTE" xml1 -o - - |	# Get the note part of the PLIST
-		xmllint --xpath '//string/text()' -	# Grab only the "string" element of the XML
+		xxd -r -p 2>/dev/null |					# Decode the hex
+		plutil -extract "NOTE" xml1 -o - - 2>/dev/null |	# Get the note part of the PLIST
+		xmllint --xpath '//string/text()' - 2>/dev/null 	# Grab only the "string" element of the XML
 	)
+	# Confirm that we're using a Secure Note item, which one, and the VPN target name
+	echo -e "\nUsing login script from Keychain Secure Note Item \"${keychain_script_name}\" to connect to \"${vpn_host}\"..."
 fi
 
 # Finally, we should now have everything we need!
@@ -253,7 +261,7 @@ if vpn state | grep -q "state: Connected" ; then
 	echo -e "\n*** VPN connection appears to be already established! ***"
 	echo "\"/opt/cisco/anyconnect/bin/vpn state\" reports \"state: Connected\""
 	vpn stats | grep -E 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
-	printf "Do you want to end the current connection and continue? [Y/n] "
+	printf "Do you want to end the current connection and continue with a new connection? [Y/n] "
 	read -r answer
 	case ${answer} in
 		n*)	echo "OK - exiting this script to preserve your existing connection."
@@ -282,7 +290,7 @@ ui_pid=$( pgrep "Cisco AnyConnect Secure Mobility Client" ) && kill "${ui_pid}"
 echo -e "\nIf the connection does not complete after 20 to 30 seconds, hit Control-C (^C) to abort."
 echo "After repeated failures, check your credentials \"script\" in the Keychain, and try"
 echo "running this again with \"-v\" flag."
-echo -e "\nIf your credentials script from the Keychain works, the next thing you should get is the prompt from Duo."
+echo -e "\nIf your credentials script from the Keychain works, the next thing you should get is the prompt from Duo on your mobile device."
 printf "\nConnecting to %s..." "${vpn_host}"
 
 
@@ -309,7 +317,7 @@ if vpn state | grep -q "state: Connected" ; then
 	echo "Connected!"
 	vpn stats | grep -E 'Client Address \(IPv4\)|Profile Name' 	# Display the client-side IP address and realm
 else
-	echo "VPN appears not connected when running command \"/opt/cisco/anyconnect/bin/vpn state\". Something may have gone wrong. Try repeating with \"-v\"."
+	>&2 echo -e "\nVPN appears not connected when running command \"/opt/cisco/anyconnect/bin/vpn state\". Something may have gone wrong. Try repeating with \"-v\"."
 	exit 1
 fi
 
