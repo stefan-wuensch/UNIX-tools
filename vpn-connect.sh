@@ -106,7 +106,7 @@
 ########################################################################################################################
 # MIT License
 #
-# Copyright (c) 2017 Stefan Wuensch
+# Copyright (c) 2018 Stefan Wuensch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -311,6 +311,10 @@ if [[ ${exit_state} -ne 0 ]] ; then
 	echo "Problem making VPN connection. Check your keychain item, and try running this with \"-v\"."
 fi
 
+# Wait for a moment for the connection to stabilze. I've seen a *very* rare case where
+# running "vpn state" will hang if it's too soon after the "vpn connect" is run. I can't
+# reproduce it deliberately, so this is just in case it helps.
+sleep 2
 
 # Display the state of the connection - which should be "state: Connected" from the "vpn" command.
 if vpn state | grep -q "state: Connected" ; then
