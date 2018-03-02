@@ -265,6 +265,8 @@ if vpn state | grep -q "state: Connected" ; then
 	read -r answer
 	case ${answer} in
 		n*)	echo "OK - exiting this script to preserve your existing connection."
+			# See end of this script for details on this "open" call. Opening it here since we were told to stay connected.
+			open -j -g "/Applications/Cisco/Cisco AnyConnect Secure Mobility Client.app"
 			exit 0 ;;
 		*)	echo "OK - terminating your existing connection to set up a new one."
 			vpn disco | grep '>>'	# Short for "disconnect" but I have to use the cool abbreviation!! :-)
