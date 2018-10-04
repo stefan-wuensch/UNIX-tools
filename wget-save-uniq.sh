@@ -71,6 +71,14 @@ PATH=/usr/bin:/bin:/usr/local/bin
 export PATH
 
 
+# Optional feature: in the case of a name collision, if you want the downloaded file name
+# to NOT get the timestamp added to it, then make this option "N".
+# If this option is "Y" then the newly-downloaded file WILL get the timestamp added to the name.
+# The addition of the timestamp might not be desired in cases where you need the download
+# to give you the exact file name as the remote file.
+COLLISION_ADD_MTIME_NEW_FILE="N"
+
+
 
 ####################################################################################################
 usage() {
@@ -94,7 +102,7 @@ usage() {
 #    Returns "foo.pdf"
 
 filename_from_url() {
-	echo $( echo "${1}" | awk -F/ '{print $NF}' )
+	echo $( echo "${1}" | awk -F/ '{print $NF}' )	# return to caller
 }
 
 
@@ -170,21 +178,41 @@ handle_collision() {
 
 		# If there's a dot in the file name, we'll assume it's an extension.
 		if [[ "${handle_this_filename}" =~ \. ]] ; then
+
+			# Break apart the file name base and extension to be separate
 			name_part="${handle_this_filename%.*}"
 			extension="${handle_this_filename##*.}"
+
+			# Rename the previous one
 			mv "${handle_this_filename}" "${name_part}.$( mtime_for_platform ${handle_this_filename} ).${extension}"
-			# Note how the next move is a rename AND move, and it's into the CWD "."
-			mv "${TMPFILE}" "./${name_part}.$( mtime_for_platform ${TMPFILE} ).${extension}"
-			echo "${name_part}"
+
+			# Note how the next 'mv' is a rename AND move of the new file, and it's into the CWD "."
+			# We operate differently depending on whether we're adding the timestamp to the new file or not.
+			if [[ "${COLLISION_ADD_MTIME_NEW_FILE}" == "Y" ]] ; then
+				mv "${TMPFILE}" "./${name_part}.$( mtime_for_platform ${TMPFILE} ).${extension}"
+			else
+				mv "${TMPFILE}" "./${handle_this_filename}"
+			fi
+
+			echo "${name_part}"	# return to caller
+
 		else
+			# If there's no extension, we just add the timestamp onto the end, easy-peasy.
 			mv "${handle_this_filename}" "${handle_this_filename}.$( mtime_for_platform ${handle_this_filename} )"
-			# Note how the next move is a rename AND move, and it's into the CWD "."
-			mv "${TMPFILE}" "./${handle_this_filename}.$( mtime_for_platform ${TMPFILE} )"
-			echo "${handle_this_filename}"
+
+			# Note how the next 'mv' is a rename AND move of the new file, and it's into the CWD "."
+			# We operate differently depending on whether we're adding the timestamp to the new file or not.
+			if [[ "${COLLISION_ADD_MTIME_NEW_FILE}" == "Y" ]] ; then
+				mv "${TMPFILE}" "./${handle_this_filename}.$( mtime_for_platform ${TMPFILE} )"
+			else
+				mv "${TMPFILE}" "./${handle_this_filename}"
+			fi
+
+			echo "${handle_this_filename}"	# return to caller
 		fi
 	else
 		>&2 echo "Existing file on disk is identical to the newly-downloaded file. Discarding the download. No change."
-		echo "$( filename_from_url ${handle_this_url} )"
+		echo "$( filename_from_url ${handle_this_url} )"	# return to caller
 	fi
 
 	# Cleanup in aisle 3
@@ -197,7 +225,7 @@ handle_collision() {
 ####################################################################################################
 
 
-# Main program start
+### Main program start ###
 
 # Handle wrong number of args and help
 [[ ${#} -ne 1 ]] && usage
