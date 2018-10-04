@@ -3,6 +3,88 @@
 Various useful UNIX scripts and tools, for Mac and Linux.
 
 
+
+## wget-save-uniq.sh
+
+### notes taken from comments in the script)
+
+by Stefan Wuensch, 2018-10-03
+
+This script takes one arg, a URL to download with "wget".
+There are three different scenarios handled by this script.
+
+1) If the file to be downloaded does NOT already exist in the
+current location (CWD) then it will be downloaded with no other actions.
+
+2) If the file to be downloaded already exists in the CWD with the same name,
+then this script will download the new file, compare the existing and the
+new files via SHA256
+
+3a) If there is no difference in the files based on the checksums,
+leave the existing file in place without any changes. In other words...
+If the file in the remote location is the same as the one we already have
+locally, then don't change anything.
+
+3b) If the new file and the existing one are different based on the checksums,
+then this script will rename the existing file to include the date/time
+of last modified, and save the downloaded file similarly with its timestamp.
+
+Example scenario:
+- local file "foo.pdf" with timestamp Feb 6 2018 6:09 PM exists
+- the download URL is http://mydomain.com/path/to/foo.pdf
+- the remote file "foo.pdf" is different in content than the local copy
+- the time stamp of the remote (newly downloaded) file is Feb 13 2018 11:57 AM
+- results:
+     file named "foo.2018-02-06_1809.pdf" (previous file renamed)
+     file named "foo.2018-02-13_1157.pdf" (new file downloaded and renamed)
+
+Note: This supports two platforms, Linux and Mac, due to differences in the
+format specifiers for the "stat" command. I don't have any other platforms
+on which to test, at least right now. See function "mtime_for_platform()"
+
+
+
+### example usage
+
+
+
+#### Existing file, same contents:
+
+```
+% ls -l Understanding-The-Nagios-XI-Directory-Structure.pdf
+-rw-------@ 1 wuensch  wheel  218832 Feb 13  2018 Understanding-The-Nagios-XI-Directory-Structure.pdf
+% wget-save-uniq.sh https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf
+Found "Understanding-The-Nagios-XI-Directory-Structure.pdf" already there - processing name collision...
+2018-10-04 10:47:26 URL:https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf [218832/218832] -> "/tmp/wget-save-uniq.sh.hWYbkPB7D" [1]
+Existing file on disk is identical to the newly-downloaded file. Discarding the download. No change.
+-rw-------@ 1 wuensch  wheel  218832 Feb 13  2018 Understanding-The-Nagios-XI-Directory-Structure.pdf
+%
+```
+
+
+#### Existing file, different contents, and different timestamp:
+
+```
+% ls -l Understanding-The-Nagios-XI-Directory-Structure.pdf
+-r--------@ 1 wuensch  staff  97694 Feb  6  2018 Understanding-The-Nagios-XI-Directory-Structure.pdf
+% wget-save-uniq.sh https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf
+Found "Understanding-The-Nagios-XI-Directory-Structure.pdf" already there - processing name collision...
+2018-10-04 10:49:11 URL:https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf [218832/218832] -> "/tmp/wget-save-uniq.sh.4IC4Bo8jW" [1]
+Existing file differs from newly downloaded file even though names are the same. Renaming the old.
+Existing file mtime 2018-02-06_1809
+New file mtime 2018-02-13_1157
+-r--------@ 1 wuensch  staff   97694 Feb  6  2018 Understanding-The-Nagios-XI-Directory-Structure.2018-02-06_1809.pdf
+-rw-------@ 1 wuensch  wheel  218832 Feb 13  2018 Understanding-The-Nagios-XI-Directory-Structure.2018-02-13_1157.pdf
+%
+```
+
+
+
+
+
+
+
+
 ## chrome-extension-search.sh
 
 In order to locate Chrome Extensions from only their ID, this generates a Google search URL from each Extension ID found in your Chrome Extensions folder.
