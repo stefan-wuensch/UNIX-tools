@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1117
+# shellcheck disable=SC1117,SC2086
 
 ####################################################################################################
 # wget-save-uniq.sh
