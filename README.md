@@ -65,16 +65,16 @@ Existing file on disk is identical to the newly-downloaded file. Discarding the 
 #### Existing file, different contents, and different timestamp:
 
 ```
-% ls -l Understanding-The-Nagios-XI-Directory-Structure.pdf
+% ls -l Understanding-The-Nagios-XI-Directory-Structure*
 -r--------@ 1 wuensch  staff  97694 Feb  6  2018 Understanding-The-Nagios-XI-Directory-Structure.pdf
 % wget-save-uniq.sh https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf
 Found "Understanding-The-Nagios-XI-Directory-Structure.pdf" already there - processing name collision...
-2018-10-04 10:49:11 URL:https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf [218832/218832] -> "/tmp/wget-save-uniq.sh.4IC4Bo8jW" [1]
+2018-10-05 16:22:22 URL:https://assets.nagios.com/downloads/nagiosxi/docs/Understanding-The-Nagios-XI-Directory-Structure.pdf [218832/218832] -> "/tmp/wget-save-uniq.sh.ZLRZSeAX6" [1]
 Existing file differs from newly downloaded file even though names are the same. Renaming the old.
 Existing file mtime 2018-02-06_1809
 New file mtime 2018-02-13_1157
 -r--------@ 1 wuensch  staff   97694 Feb  6  2018 Understanding-The-Nagios-XI-Directory-Structure.2018-02-06_1809.pdf
--rw-------@ 1 wuensch  wheel  218832 Feb 13  2018 Understanding-The-Nagios-XI-Directory-Structure.2018-02-13_1157.pdf
+-rw-------@ 1 wuensch  wheel  218832 Feb 13  2018 Understanding-The-Nagios-XI-Directory-Structure.pdf
 %
 ```
 
