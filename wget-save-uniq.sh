@@ -163,7 +163,7 @@ handle_collision() {
 	trap "rm -f \${TMPFILE}; exit 0" EXIT HUP INT QUIT TERM
 
 	basename=$( basename ${0} )
-	TMPFILE=$( mktemp /tmp/${basename}.XXXXXXXXX ) || { >&2 echo "Error - coult not make temp file" ; exit 1 ; }
+	TMPFILE=$( mktemp /tmp/${basename}.XXXXXXXXX ) || { >&2 echo "Error - could not make temp file" ; exit 1 ; }
 
 	get_it "${handle_this_url}" "${TMPFILE}"
 	[[ ! -s "${TMPFILE}" ]] && >&2 echo "Got zero bytes for file - error" && exit 1
