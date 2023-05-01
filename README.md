@@ -4,9 +4,20 @@ Various useful UNIX scripts and tools, for Mac and Linux.
 
 
 
+## save-POST.py
+
+### (notes taken from comments in the script)
+
+Save HTTP POST data to log files. Data comes from Apache on STDIN, and
+is saved to two log files sequentially: one log file with a consistent name
+and another log file with a unique (time-stamp) name.
+
+
+
+
 ## wget-save-uniq.sh
 
-### notes taken from comments in the script)
+### (notes taken from comments in the script)
 
 by Stefan Wuensch, 2018-10-03
 

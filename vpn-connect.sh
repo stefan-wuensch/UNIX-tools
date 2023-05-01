@@ -47,7 +47,7 @@
 # Each Keychain Item VPN login "script" must contain four elements for Harvard:
 # 	1) your Harvard Key email address
 # 	2) your Harvard Key password
-# 	3) a blank line (which forces Duo Push)
+# 	3) a blank line (which forces Duo Push) or One-Time-Password (OTP)
 # 	4) the letter "y" (to accept the connection terms)
 #
 # *** You can use either the "Secure Note Item" format or the "Password Item" format. ***
@@ -61,7 +61,7 @@
 #-------------------------------------------------------
 # john_harvard@harvard.edu#vpnrealm
 # p4ssw0rd
-#
+# OTP_VALUE
 # y
 #-------------------------------------------------------
 #
@@ -106,7 +106,7 @@
 ########################################################################################################################
 # MIT License
 #
-# Copyright (c) 2018 Stefan Wuensch
+# Copyright (c) 2020 Stefan Wuensch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -138,6 +138,11 @@ keychain_script_name="Stefan VPN Login Script" 	# Same - set a default for if th
 ########################################################################################################################
 
 
+# Other default variables for operation. You should not need to change these!
+otp_placeholder_string="OTP_VALUE"		# Defines the string in the login script to be replaced with OTP value
+token_value=""					# Set to null, so if no OTP is given in args the default will be push
+
+
 # Set safe path
 PATH=/usr/bin:/opt/cisco/anyconnect/bin:/bin
 export PATH
@@ -145,7 +150,7 @@ export PATH
 
 ########################################################################################################################
 usage() {
-	echo -e "\nUsage: ${0} [ -v ] [ -h ] [ -n \"name of login script in Keychain\" ] [ -d \"name of VPN device\" ]"
+	echo -e "\nUsage: ${0} [ -v ] [ -h ] [ -t OTP_value ][ -n \"name of login script in Keychain\" ] [ -d \"name of VPN device\" ]"
 	echo -e "\nDefault values:"
 	echo -e "Keychain item default name: \"${keychain_script_name}\"  (edit this script to change)"
 	echo -e "VPN target default name:    \"${vpn_host}\"  (edit this script to change)"
@@ -199,7 +204,7 @@ if [[ -n "${1}" ]] ; then	# Only if it's set
 fi
 
 # Take the args if they are present
-while getopts ":vhn:d:" theOption ; do
+while getopts ":vhn:d:t:" theOption ; do
 	case $theOption in
 		v)	echo -e "\nTurning on verbose mode. YOUR CREDENTIALS MIGHT BE DISPLAYED."
 			echo "Hit ^C in the next 5 seconds if this is not what you want."
@@ -211,6 +216,8 @@ while getopts ":vhn:d:" theOption ; do
 		n)	keychain_script_name="${OPTARG}" ;;
 
 		d)	vpn_host="${OPTARG}" ;;
+
+		t)	token_value="${OPTARG}" ;;
 
 		:)	>&2 echo -e "\nError: \"-${OPTARG}\" needs a value."
 			>&2 usage ; exit 1 ;;
@@ -252,6 +259,11 @@ else
 	# Confirm that we're using a Secure Note item, which one, and the VPN target name
 	echo -e "\nUsing login script from Keychain Secure Note Item \"${keychain_script_name}\" to connect to \"${vpn_host}\"..."
 fi
+
+# Now replace the OTP place-holder in the login script with the actual OTP, which is null if not specified.
+# The default null value for the OTP will cause Duo push - at least in our Harvard environment.
+login_script=$( echo "${login_script}" | sed -e "s/${otp_placeholder_string}/${token_value}/" )
+
 
 # Finally, we should now have everything we need!
 
@@ -298,6 +310,7 @@ printf "\nConnecting to %s..." "${vpn_host}"
 
 # Only show output from the connection if '-v' arg was given.
 if [[ -n "${verbose}" ]] && [[ "${verbose}" == "YES" ]] ; then
+	echo -e "\nLogin script is:\n${login_script}"
 	echo "${login_script}" | vpn -s connect "${vpn_host}"
 	exit_state=$?
 else
